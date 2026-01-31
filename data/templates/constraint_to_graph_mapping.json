@@ -1,0 +1,899 @@
+{
+  "schema_version": "1.0",
+  "description": "约束驱动的图谱遍历映射规则表 - 将自然语言约束映射到知识图谱操作",
+  "author": "胡云舒团队",
+  "last_updated": "2026-01-27",
+  
+  "node_types": ["Paper", "Author", "Institution", "Venue", "Entity"],
+  "edge_types": ["HAS_AUTHOR", "AFFILIATED_WITH", "PUBLISHED_IN", "MENTIONS", "CITES"],
+  
+  "action_types": {
+    "filter_current_node": "在当前节点上应用过滤条件，不进行图遍历跳转",
+    "traverse_edge": "沿指定边类型跳转到目标节点",
+    "traverse_and_count": "沿边跳转并统计满足条件的节点数量"
+  },
+  
+  "constraint_mappings": [
+    {
+      "constraint_id": "C01",
+      "constraint_type": "temporal",
+      "constraint_name": "时间/发表年份约束",
+      "trigger_keywords": [
+        "published between",
+        "before",
+        "after",
+        "in the 1970s",
+        "in the late 2000s",
+        "submitted in",
+        "published online in",
+        "well into the 20th century"
+      ],
+      "graph_operation": {
+        "action": "filter_current_node",
+        "target_node": null,
+        "edge_type": null,
+        "filter_attribute": "publication_year",
+        "filter_condition": "temporal_range",
+        "applicable_node_types": ["Paper"]
+      },
+      "examples": [
+        "paper published between 2015 and 2020",
+        "published before 2010",
+        "submitted in August 2012"
+      ]
+    },
+    
+    {
+      "constraint_id": "C02",
+      "constraint_type": "author_count",
+      "constraint_name": "作者数量约束",
+      "trigger_keywords": [
+        "authored by",
+        "co-authored by",
+        "written by",
+        "authors",
+        "co-authors",
+        "individuals"
+      ],
+      "graph_operation": {
+        "action": "traverse_and_count",
+        "target_node": "Author",
+        "edge_type": "HAS_AUTHOR",
+        "direction": "outgoing",
+        "filter_attribute": null,
+        "filter_condition": "count_equals"
+      },
+      "examples": [
+        "authored by five individuals",
+        "written by three people",
+        "co-authored by two authors"
+      ]
+    },
+    
+    {
+      "constraint_id": "C03",
+      "constraint_type": "institution_affiliation",
+      "constraint_name": "机构隶属/任职关系",
+      "trigger_keywords": [
+        "affiliated with",
+        "worked at",
+        "faculty member at",
+        "employed by",
+        "from [university/institution]",
+        "professor at"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Institution",
+        "edge_type": "AFFILIATED_WITH",
+        "direction": "outgoing",
+        "filter_attribute": null,
+        "filter_condition": null
+      },
+      "examples": [
+        "affiliated with Stanford University",
+        "faculty member at MIT",
+        "worked at Google Research"
+      ]
+    },
+    
+    {
+      "constraint_id": "C04",
+      "constraint_type": "education_degree",
+      "constraint_name": "学位获取关系",
+      "trigger_keywords": [
+        "Ph.D. from",
+        "received degree from",
+        "earned B.A./M.Sc. from",
+        "obtained degree at",
+        "undergraduate degree at",
+        "completed their Ph.D."
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Institution",
+        "edge_type": "AFFILIATED_WITH",
+        "direction": "outgoing",
+        "edge_filter": {
+          "relationship_type": "education"
+        },
+        "filter_attribute": null,
+        "filter_condition": null
+      },
+      "examples": [
+        "Ph.D. from University of Toronto",
+        "earned B.A. from Columbia University",
+        "undergraduate degree at IIT BHU"
+      ],
+      "note": "使用AFFILIATED_WITH边的relationship_type属性区分教育和任职关系"
+    },
+    
+    {
+      "constraint_id": "C05",
+      "constraint_type": "publication_venue",
+      "constraint_name": "发表载体(期刊/会议)",
+      "trigger_keywords": [
+        "published in",
+        "journal",
+        "conference",
+        "proceedings",
+        "symposium paper",
+        "open-access journal",
+        "official journal of"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Venue",
+        "edge_type": "PUBLISHED_IN",
+        "direction": "outgoing",
+        "filter_attribute": null,
+        "filter_condition": null
+      },
+      "examples": [
+        "published in Nature",
+        "proceedings of NeurIPS",
+        "open-access epidemiology journal"
+      ]
+    },
+    
+    {
+      "constraint_id": "C06",
+      "constraint_type": "institution_founding",
+      "constraint_name": "机构成立时间",
+      "trigger_keywords": [
+        "university founded between",
+        "established in",
+        "chartered after/before",
+        "oldest university",
+        "fourth oldest",
+        "founding year"
+      ],
+      "graph_operation": {
+        "action": "filter_current_node",
+        "target_node": null,
+        "edge_type": null,
+        "filter_attribute": "founded_year",
+        "filter_condition": "temporal_range",
+        "applicable_node_types": ["Institution"]
+      },
+      "examples": [
+        "university founded between 1955 and 1960",
+        "one of the oldest universities",
+        "chartered after 1850 but before 1895"
+      ]
+    },
+    
+    {
+      "constraint_id": "C07",
+      "constraint_type": "award_honor",
+      "constraint_name": "奖项/荣誉",
+      "trigger_keywords": [
+        "awarded",
+        "elected fellow",
+        "received prize",
+        "named [fellow/scholar]",
+        "honorary degree",
+        "recognized for",
+        "Rollo Davidson Prize",
+        "Siebel Scholar"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Entity",
+        "edge_type": "MENTIONS",
+        "direction": "outgoing",
+        "entity_filter": {
+          "type": "award"
+        },
+        "filter_attribute": null,
+        "filter_condition": null
+      },
+      "examples": [
+        "awarded the Rollo Davidson Prize",
+        "elected fellow of the American Mathematical Society",
+        "recognized as a Siebel Scholar"
+      ]
+    },
+    
+    {
+      "constraint_id": "C08",
+      "constraint_type": "citation",
+      "constraint_name": "引用关系",
+      "trigger_keywords": [
+        "cited",
+        "reference",
+        "bibliography",
+        "cites",
+        "reference list",
+        "references cited",
+        "reference number N"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Paper",
+        "edge_type": "CITES",
+        "direction": "outgoing",
+        "filter_attribute": null,
+        "filter_condition": null
+      },
+      "examples": [
+        "cites a paper published in 1994",
+        "reference list includes 27 citations",
+        "cited by over 1000 papers"
+      ],
+      "note": "direction可为outgoing(引用他人)或incoming(被他人引用)"
+    },
+    
+    {
+      "constraint_id": "C09",
+      "constraint_type": "coauthor",
+      "constraint_name": "合作关系",
+      "trigger_keywords": [
+        "co-authored with",
+        "collaborated",
+        "same authors as",
+        "shared authors",
+        "together with",
+        "co-authored an article previously"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Author",
+        "edge_type": "HAS_AUTHOR",
+        "direction": "outgoing",
+        "filter_attribute": null,
+        "filter_condition": "multiple_papers_shared"
+      },
+      "examples": [
+        "co-authored with Person B in 1994",
+        "collaborated with the same researcher",
+        "shared authorship on three papers"
+      ],
+      "note": "需要从Paper跳到Author，再跳回Paper查找共同作者"
+    },
+    
+    {
+      "constraint_id": "C10",
+      "constraint_type": "research_topic",
+      "constraint_name": "研究主题/领域",
+      "trigger_keywords": [
+        "paper discusses",
+        "explores",
+        "focuses on",
+        "study of",
+        "research on",
+        "analyzes",
+        "topic"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Entity",
+        "edge_type": "MENTIONS",
+        "direction": "outgoing",
+        "entity_filter": {
+          "type": "research_topic"
+        },
+        "filter_attribute": null,
+        "filter_condition": null
+      },
+      "examples": [
+        "paper discusses international relations",
+        "focuses on vocal disabilities",
+        "research on iron-dependent cell death"
+      ]
+    },
+    
+    {
+      "constraint_id": "C11",
+      "constraint_type": "method_technique",
+      "constraint_name": "方法学/技术",
+      "trigger_keywords": [
+        "method",
+        "technique",
+        "approach",
+        "model",
+        "algorithm",
+        "regression",
+        "neural network",
+        "spectroscopy"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Entity",
+        "edge_type": "MENTIONS",
+        "direction": "outgoing",
+        "entity_filter": {
+          "type": "method"
+        },
+        "filter_attribute": null,
+        "filter_condition": null
+      },
+      "examples": [
+        "uses a specific regression model",
+        "employs neural network techniques",
+        "method for quality control"
+      ]
+    },
+    
+    {
+      "constraint_id": "C12",
+      "constraint_type": "data_sample",
+      "constraint_name": "数据/样本详情",
+      "trigger_keywords": [
+        "sample size",
+        "N participants",
+        "specimens",
+        "subjects",
+        "data",
+        "database",
+        "dataset"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Entity",
+        "edge_type": "MENTIONS",
+        "direction": "outgoing",
+        "entity_filter": {
+          "type": "data"
+        },
+        "filter_attribute": null,
+        "filter_condition": null
+      },
+      "examples": [
+        "sample size between 150 and 400",
+        "23,819 undergraduate applicants",
+        "non-redundant database"
+      ]
+    },
+    
+    {
+      "constraint_id": "C13",
+      "constraint_type": "paper_structure",
+      "constraint_name": "论文结构属性",
+      "trigger_keywords": [
+        "title contains",
+        "title ends with",
+        "N tables",
+        "N figures",
+        "N references",
+        "abstract",
+        "acknowledgments section",
+        "author contributions"
+      ],
+      "graph_operation": {
+        "action": "filter_current_node",
+        "target_node": null,
+        "edge_type": null,
+        "filter_attribute": "structural_attributes",
+        "filter_condition": "attribute_match",
+        "applicable_node_types": ["Paper"]
+      },
+      "examples": [
+        "title ends with the word 'problems'",
+        "includes 27 citations in the reference list",
+        "has six tables"
+      ]
+    },
+    
+    {
+      "constraint_id": "C14",
+      "constraint_type": "acknowledgment",
+      "constraint_name": "致谢内容",
+      "trigger_keywords": [
+        "acknowledgments section",
+        "thanked",
+        "acknowledged for",
+        "dedicated to",
+        "expressed gratitude",
+        "mentioned in acknowledgments"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Entity",
+        "edge_type": "MENTIONS",
+        "direction": "outgoing",
+        "entity_filter": {
+          "type": "acknowledged_person"
+        },
+        "filter_attribute": null,
+        "filter_condition": null
+      },
+      "examples": [
+        "thanked in acknowledgments section",
+        "acknowledged their spouse",
+        "mentioned a restaurant in acknowledgments"
+      ]
+    },
+    
+    {
+      "constraint_id": "C15",
+      "constraint_type": "funding",
+      "constraint_name": "资助信息",
+      "trigger_keywords": [
+        "funded by",
+        "grant",
+        "scholarship",
+        "support from",
+        "funding source",
+        "German Science Foundation grant"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Entity",
+        "edge_type": "MENTIONS",
+        "direction": "outgoing",
+        "entity_filter": {
+          "type": "funding"
+        },
+        "filter_attribute": null,
+        "filter_condition": null
+      },
+      "examples": [
+        "funded by NSF grant",
+        "received scholarship from",
+        "support from transport organization"
+      ]
+    },
+    
+    {
+      "constraint_id": "C16",
+      "constraint_type": "conference_event",
+      "constraint_name": "会议/演讲事件",
+      "trigger_keywords": [
+        "speaker at",
+        "talk at",
+        "presentation",
+        "symposium",
+        "conference presentation",
+        "invited speaker",
+        "International Congress of Mathematicians"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Entity",
+        "edge_type": "MENTIONS",
+        "direction": "outgoing",
+        "entity_filter": {
+          "type": "event"
+        },
+        "filter_attribute": null,
+        "filter_condition": null
+      },
+      "examples": [
+        "speaker at 2019 medical conference",
+        "gave two talks in 2017",
+        "invited speaker at ICM 2002"
+      ]
+    },
+    
+    {
+      "constraint_id": "C17",
+      "constraint_type": "position_title",
+      "constraint_name": "专业职位/头衔",
+      "trigger_keywords": [
+        "Professor",
+        "Associate Professor",
+        "faculty",
+        "researcher",
+        "principal investigator",
+        "chair",
+        "director",
+        "head"
+      ],
+      "graph_operation": {
+        "action": "filter_current_node",
+        "target_node": null,
+        "edge_type": null,
+        "filter_attribute": "position",
+        "filter_condition": "attribute_match",
+        "applicable_node_types": ["Author"]
+      },
+      "examples": [
+        "Associate Professor at",
+        "principal investigator in",
+        "director of postgraduate studies"
+      ]
+    },
+    
+    {
+      "constraint_id": "C18",
+      "constraint_type": "birth_info",
+      "constraint_name": "出生日期/地点",
+      "trigger_keywords": [
+        "born between",
+        "born in [city/year]",
+        "age",
+        "birth year",
+        "birth place"
+      ],
+      "graph_operation": {
+        "action": "filter_current_node",
+        "target_node": null,
+        "edge_type": null,
+        "filter_attribute": "birth_year",
+        "filter_condition": "temporal_range",
+        "applicable_node_types": ["Author"]
+      },
+      "examples": [
+        "born between 1933 and 1935",
+        "born in Athens",
+        "birth year in the 1940s"
+      ]
+    },
+    
+    {
+      "constraint_id": "C19",
+      "constraint_type": "title_format",
+      "constraint_name": "论文标题格式",
+      "trigger_keywords": [
+        "title ends with",
+        "title is phrased as a question",
+        "title includes",
+        "full title",
+        "title contains"
+      ],
+      "graph_operation": {
+        "action": "filter_current_node",
+        "target_node": null,
+        "edge_type": null,
+        "filter_attribute": "title",
+        "filter_condition": "string_pattern_match",
+        "applicable_node_types": ["Paper"]
+      },
+      "examples": [
+        "title ends with 'Intervention'",
+        "title includes the word 'problems'",
+        "title is phrased as a question"
+      ]
+    },
+    
+    {
+      "constraint_id": "C20",
+      "constraint_type": "technical_entity",
+      "constraint_name": "具体技术实体",
+      "trigger_keywords": [
+        "drug",
+        "medicine",
+        "compound",
+        "protein",
+        "gene",
+        "molecule",
+        "element",
+        "material",
+        "plant",
+        "coolant",
+        "alloy"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Entity",
+        "edge_type": "MENTIONS",
+        "direction": "outgoing",
+        "entity_filter": {
+          "type": "chemical_entity"
+        },
+        "filter_attribute": null,
+        "filter_condition": null
+      },
+      "examples": [
+        "mentions a specific drug",
+        "discusses a type of coolant",
+        "explores an alloy with specific properties"
+      ]
+    },
+    
+    {
+      "constraint_id": "C21",
+      "constraint_type": "location",
+      "constraint_name": "地理位置线索",
+      "trigger_keywords": [
+        "located in",
+        "city of",
+        "state",
+        "region",
+        "Asian country",
+        "European university"
+      ],
+      "graph_operation": {
+        "action": "filter_current_node",
+        "target_node": null,
+        "edge_type": null,
+        "filter_attribute": "location",
+        "filter_condition": "attribute_match",
+        "applicable_node_types": ["Institution", "Venue"]
+      },
+      "examples": [
+        "university located in California",
+        "institution in an Asian country",
+        "city with population between 80,000 and 90,000"
+      ]
+    },
+    
+    {
+      "constraint_id": "C22",
+      "constraint_type": "author_order",
+      "constraint_name": "作者顺序",
+      "trigger_keywords": [
+        "first author",
+        "second author",
+        "third author",
+        "last author",
+        "corresponding author",
+        "in that very order"
+      ],
+      "graph_operation": {
+        "action": "filter_current_node",
+        "target_node": null,
+        "edge_type": null,
+        "filter_attribute": "author_order",
+        "filter_condition": "positional_match",
+        "applicable_node_types": ["Author"]
+      },
+      "examples": [
+        "first author of the paper",
+        "third author in both articles",
+        "corresponding author"
+      ],
+      "note": "通常在HAS_AUTHOR边上检查author_order属性"
+    },
+    
+    {
+      "constraint_id": "C23",
+      "constraint_type": "publication_history",
+      "constraint_name": "共同发表历史",
+      "trigger_keywords": [
+        "previously co-authored",
+        "co-authored an article",
+        "another paper by",
+        "also published",
+        "same year published",
+        "published one paper"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Paper",
+        "edge_type": "HAS_AUTHOR",
+        "direction": "incoming",
+        "filter_attribute": null,
+        "filter_condition": "multiple_papers"
+      },
+      "examples": [
+        "previously co-authored an article in 1994",
+        "another paper published in 2020",
+        "published only one paper in 2020"
+      ],
+      "note": "需要反向遍历: Author -> HAS_AUTHOR -> Paper"
+    },
+    
+    {
+      "constraint_id": "C24",
+      "constraint_type": "editorial_role",
+      "constraint_name": "审稿/编辑角色",
+      "trigger_keywords": [
+        "edited by",
+        "reviewer",
+        "editor of journal",
+        "author notes",
+        "editorial board"
+      ],
+      "graph_operation": {
+        "action": "filter_current_node",
+        "target_node": null,
+        "edge_type": null,
+        "filter_attribute": "editorial_role",
+        "filter_condition": "attribute_match",
+        "applicable_node_types": ["Author"]
+      },
+      "examples": [
+        "editor of a journal focused on teaching",
+        "served as reviewer",
+        "member of editorial board"
+      ]
+    },
+    
+    {
+      "constraint_id": "C25",
+      "constraint_type": "measurement_value",
+      "constraint_name": "特定数值/测量值",
+      "trigger_keywords": [
+        "temperature between X and Y",
+        "modulus",
+        "density",
+        "N citations",
+        "N pages",
+        "percent",
+        "elastic modulus",
+        "annealing temperature"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Entity",
+        "edge_type": "MENTIONS",
+        "direction": "outgoing",
+        "entity_filter": {
+          "type": "measurement"
+        },
+        "filter_attribute": "value",
+        "filter_condition": "numeric_range"
+      },
+      "examples": [
+        "annealing temperature more than 300°C",
+        "elastic modulus between 10,000 and 18,000 ksi",
+        "citation count at 13.53 percent"
+      ]
+    },
+    
+    {
+      "constraint_id": "C26",
+      "constraint_type": "company",
+      "constraint_name": "公司/商业实体",
+      "trigger_keywords": [
+        "company",
+        "corporation",
+        "foundation",
+        "non-profit",
+        "industry",
+        "founded a company"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Institution",
+        "edge_type": "AFFILIATED_WITH",
+        "direction": "outgoing",
+        "institution_filter": {
+          "type": "company"
+        },
+        "filter_attribute": null,
+        "filter_condition": null
+      },
+      "examples": [
+        "founded a company between 2015 and 2019",
+        "employed by Google",
+        "worked for an electricity supplier"
+      ]
+    },
+    
+    {
+      "constraint_id": "C27",
+      "constraint_type": "publication_details",
+      "constraint_name": "出版细节",
+      "trigger_keywords": [
+        "volume N",
+        "issue N",
+        "page numbers",
+        "DOI",
+        "accepted in",
+        "received in",
+        "revised",
+        "first issue"
+      ],
+      "graph_operation": {
+        "action": "filter_current_node",
+        "target_node": null,
+        "edge_type": null,
+        "filter_attribute": "publication_details",
+        "filter_condition": "attribute_match",
+        "applicable_node_types": ["Paper", "Venue"]
+      },
+      "examples": [
+        "published in volume 93, issue 2",
+        "first issue of the journal",
+        "DOI: 10.1234/example"
+      ]
+    },
+    
+    {
+      "constraint_id": "C28",
+      "constraint_type": "person_name",
+      "constraint_name": "人名/人物匹配",
+      "trigger_keywords": [
+        "name identical to",
+        "same name as",
+        "full name",
+        "first/last name",
+        "named after"
+      ],
+      "graph_operation": {
+        "action": "filter_current_node",
+        "target_node": null,
+        "edge_type": null,
+        "filter_attribute": "name",
+        "filter_condition": "string_match",
+        "applicable_node_types": ["Author"]
+      },
+      "examples": [
+        "name identical to that of a country",
+        "full name matches historical figure",
+        "last name shared with a former president"
+      ]
+    },
+    
+    {
+      "constraint_id": "C29",
+      "constraint_type": "advisor",
+      "constraint_name": "导师关系",
+      "trigger_keywords": [
+        "supervised by",
+        "advisor",
+        "major professor",
+        "PhD supervisor",
+        "mentor"
+      ],
+      "graph_operation": {
+        "action": "traverse_edge",
+        "target_node": "Author",
+        "edge_type": "MENTIONS",
+        "direction": "outgoing",
+        "entity_filter": {
+          "type": "advisor"
+        },
+        "filter_attribute": null,
+        "filter_condition": null
+      },
+      "examples": [
+        "supervised by a professor from MIT",
+        "major professor earned Ph.D. from",
+        "advisor born in Athens"
+      ],
+      "note": "也可以使用Author -> Author的advisor关系边"
+    },
+    
+    {
+      "constraint_id": "C30",
+      "constraint_type": "department",
+      "constraint_name": "院系/学科",
+      "trigger_keywords": [
+        "department of",
+        "faculty of",
+        "school of",
+        "institute of",
+        "department founded"
+      ],
+      "graph_operation": {
+        "action": "filter_current_node",
+        "target_node": null,
+        "edge_type": null,
+        "filter_attribute": "department",
+        "filter_condition": "attribute_match",
+        "applicable_node_types": ["Institution"]
+      },
+      "examples": [
+        "Department of Management",
+        "faculty of liberal arts and sciences",
+        "department established between 1947 and 1967"
+      ]
+    }
+  ],
+  
+  "usage_instructions": {
+    "lookup_rule_pseudocode": "for rule in constraint_mappings: if any(keyword in constraint_text for keyword in rule['trigger_keywords']): return rule['graph_operation']",
+    "integration_example": "见 README_for_yangfei.md",
+    "validation": "运行 python schema_validator.py constraint_to_graph_mapping.json"
+  },
+  
+  "extension_guidelines": {
+    "adding_new_rule": "复制现有规则JSON块，修改constraint_id(递增)、trigger_keywords和graph_operation",
+    "modifying_action": "只能使用三种action: filter_current_node, traverse_edge, traverse_and_count",
+    "schema_constraint": "target_node必须在node_types列表中，edge_type必须在edge_types列表中"
+  }
+}

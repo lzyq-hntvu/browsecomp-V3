@@ -1,0 +1,39 @@
+# Browsecomp-V3 配置文件
+
+# 知识图谱配置
+knowledge_graph:
+  path: "/home/huyuming/projects/QandA/output/knowledge_graph_expanded.json"
+  format: "json"
+
+# 模板配置
+templates:
+  dir: "/home/huyuming/browsecomp-V2/deliverables"
+  template_file: "推理链模板.md"
+  constraint_mapping_file: "constraint_to_graph_mapping.json"
+
+# 生成配置
+generation:
+  min_constraints: 3
+  max_constraints: 6
+  batch_size: 50
+  max_retries: 10
+
+# 验证配置
+validation:
+  require_unique_answer: true
+  min_constraint_count: 3
+  check_diversity: true
+  diversity_threshold: 0.8
+
+# 输出配置
+output:
+  format: "both"  # json/markdown/both
+  include_reasoning_chain: true
+  pretty_print: true
+  dir: "output/questions"
+
+# 日志配置
+logging:
+  level: "INFO"  # DEBUG/INFO/WARNING/ERROR
+  to_file: true
+  file: "output/logs/browsecomp.log"
