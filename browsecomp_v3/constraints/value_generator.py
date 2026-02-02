@@ -113,6 +113,18 @@ class ConstraintValueGenerator:
         # 会议事件约束
         if constraint_type == "conference_event":
             return self._generate_conference_event_value()
+        
+        # Phase 3 约束：合作作者
+        if constraint_type == "coauthor":
+            return self._generate_person_name_value()  # 复用人名生成
+        
+        # Phase 3 约束：被引作者
+        if constraint_type == "cited_by_author":
+            return self._generate_person_name_value()  # 复用人名生成
+        
+        # Phase 3 约束：发表期刊
+        if constraint_type == "publication_venue":
+            return self._generate_venue_value()
 
         # 默认：返回一个合理的默认值
         return self._get_default_value(constraint_type)
@@ -370,6 +382,27 @@ class ConstraintValueGenerator:
         """生成会议事件约束值"""
         events = ["NeurIPS", "ICML", "ACL", "CVPR", "ICCV", "AAAI", "IJCAI", "ICLR"]
         return random.choice(events)
+    
+    def _generate_venue_value(self) -> str:
+        """
+        生成期刊/会议名称约束值
+        
+        从知识图谱中提取真实的 Venue 名称
+        """
+        venues = []
+        for node_id, node_data in self.kg.nodes(data=True):
+            node_type = node_data.get("type", "").upper()
+            if node_type == "VENUE":
+                venue_name = node_data.get("name")
+                if venue_name:
+                    venues.append(venue_name)
+        
+        if venues:
+            return random.choice(venues)
+        else:
+            # 如果知识图谱中没有 Venue，返回常见期刊名称
+            default_venues = ["Nature", "Science", "Cell", "PNAS", "Nature Communications"]
+            return random.choice(default_venues)
 
     def _get_default_value(self, constraint_type: str) -> Any:
         """获取未知约束类型的默认值"""

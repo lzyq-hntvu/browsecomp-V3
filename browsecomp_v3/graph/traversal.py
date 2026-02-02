@@ -80,6 +80,21 @@ class GraphTraversal:
                     )
                     step.result_count = len(current_nodes)
 
+                elif constraint.action == ActionType.MULTI_HOP_TRAVERSE:
+                    current_nodes = self._multi_hop_traverse(
+                        current_nodes,
+                        constraint.traversal_chain,
+                        constraint.requires_backtrack
+                    )
+                    step.result_count = len(current_nodes)
+
+                elif constraint.action == ActionType.CHAIN_TRAVERSE:
+                    current_nodes = self._chain_traverse(
+                        current_nodes,
+                        constraint.traversal_chain
+                    )
+                    step.result_count = len(current_nodes)
+
                 else:
                     raise GraphTraversalException(f"Unknown action: {constraint.action}")
 
@@ -403,3 +418,247 @@ class GraphTraversal:
                 return False
 
         return False
+
+    def traverse_with_filter(
+        self,
+        nodes: List[str],
+        edge_type: EdgeType,
+        target_node_type: NodeType,
+        node_filter: Optional[Dict[str, Any]] = None,
+        edge_filter: Optional[Dict[str, Any]] = None
+    ) -> List[str]:
+        """
+        遍历边并对目标节点过滤
+        
+        用于支持如: Paper → HAS_AUTHOR → Author[order=1]
+        
+        Args:
+            nodes: 起始节点列表
+            edge_type: 边类型
+            target_node_type: 目标节点类型
+            node_filter: 目标节点过滤条件 (如 {"order": 1, "name": "Kejun Bu"})
+            edge_filter: 边属性过滤条件 (如 {"author_order": 1})
+            
+        Returns:
+            满足条件的目标节点列表
+        """
+        if not nodes:
+            return []
+        
+        result_nodes = []
+        edge_type_str = edge_type.value if hasattr(edge_type, 'value') else str(edge_type)
+        target_type_str = target_node_type.value if hasattr(target_node_type, 'value') else str(target_node_type)
+        
+        for node_id in nodes:
+            try:
+                # 获取邻居
+                successors = list(self.graph.successors(node_id))
+                
+                for neighbor_id in successors:
+                    # 检查边类型
+                    edge_data = self.graph.get_edge_data(node_id, neighbor_id)
+                    if not edge_data or edge_data.get("edge_type") != edge_type_str:
+                        continue
+                    
+                    # 边属性过滤
+                    if edge_filter:
+                        match = True
+                        for attr, value in edge_filter.items():
+                            if edge_data.get(attr) != value:
+                                match = False
+                                break
+                        if not match:
+                            continue
+                    
+                    # 检查节点类型
+                    neighbor_data = self.graph.nodes.get(neighbor_id, {})
+                    neighbor_type = neighbor_data.get("type", "")
+                    if neighbor_type.upper() != target_type_str.upper():
+                        continue
+                    
+                    # 节点属性过滤
+                    if node_filter:
+                        match = True
+                        for attr, cond_value in node_filter.items():
+                            attr_value = self._get_node_attribute(neighbor_data, attr)
+                            if not self._match_condition(attr_value, cond_value):
+                                match = False
+                                break
+                        if not match:
+                            continue
+                    
+                    result_nodes.append(neighbor_id)
+                    
+            except Exception:
+                continue
+        
+        return list(set(result_nodes))
+
+    def traverse_reverse(
+        self,
+        nodes: List[str],
+        edge_type: EdgeType,
+        target_node_type: Optional[NodeType] = None
+    ) -> List[str]:
+        """
+        反向遍历边
+        
+        用于支持如: Author → HAS_AUTHOR(reverse) → Paper
+        
+        Args:
+            nodes: 起始节点列表
+            edge_type: 边类型
+            target_node_type: 目标节点类型 (None表示不限制)
+            
+        Returns:
+            反向遍历的目标节点列表
+        """
+        if not nodes:
+            return []
+        
+        result_nodes = []
+        edge_type_str = edge_type.value if hasattr(edge_type, 'value') else str(edge_type)
+        
+        for node_id in nodes:
+            try:
+                # 反向遍历：获取指向当前节点的前驱节点
+                predecessors = list(self.graph.predecessors(node_id))
+                
+                for pred_id in predecessors:
+                    # 检查边类型
+                    edge_data = self.graph.get_edge_data(pred_id, node_id)
+                    if not edge_data or edge_data.get("edge_type") != edge_type_str:
+                        continue
+                    
+                    # 检查目标节点类型
+                    if target_node_type:
+                        pred_data = self.graph.nodes.get(pred_id, {})
+                        pred_type = pred_data.get("type", "")
+                        target_type_str = target_node_type.value if hasattr(target_node_type, 'value') else str(target_node_type)
+                        if pred_type.upper() != target_type_str.upper():
+                            continue
+                    
+                    result_nodes.append(pred_id)
+                    
+            except Exception:
+                continue
+        
+        return list(set(result_nodes))
+
+    def _chain_traverse(
+        self,
+        start_nodes: List[str],
+        chain: Optional[List[Dict[str, Any]]]
+    ) -> List[str]:
+        """
+        链式遍历
+        
+        用于支持如: Paper → HAS_AUTHOR → Author → AFFILIATED_WITH → Institution
+        
+        Args:
+            start_nodes: 起始节点列表
+            chain: 遍历链定义
+                [
+                    {
+                        "edge_type": "HAS_AUTHOR",
+                        "target_node": "Author",
+                        "edge_filter": {"author_order": 1},
+                        "node_filter": {"name": "Kejun Bu"}
+                    },
+                    {
+                        "edge_type": "AFFILIATED_WITH",
+                        "target_node": "Institution",
+                        "node_filter": {"name": "MIT"}
+                    }
+                ]
+        
+        Returns:
+            链式遍历的最终节点列表
+        """
+        if not chain or not start_nodes:
+            return start_nodes
+        
+        current_nodes = start_nodes[:]
+        
+        for step in chain:
+            edge_type_str = step.get("edge_type")
+            target_node_str = step.get("target_node")
+            edge_filter = step.get("edge_filter")
+            node_filter = step.get("node_filter")
+            direction = step.get("direction", "forward")  # forward or reverse
+            
+            if not edge_type_str:
+                continue
+            
+            try:
+                # 转换为枚举类型
+                edge_type = EdgeType(edge_type_str) if edge_type_str in EdgeType.__members__.values() else None
+                target_node = NodeType(target_node_str) if target_node_str and target_node_str in NodeType.__members__.values() else None
+                
+                if not edge_type:
+                    continue
+                
+                # 执行遍历
+                if direction == "reverse":
+                    current_nodes = self.traverse_reverse(current_nodes, edge_type, target_node)
+                else:
+                    current_nodes = self.traverse_with_filter(
+                        current_nodes,
+                        edge_type,
+                        target_node,
+                        node_filter=node_filter,
+                        edge_filter=edge_filter
+                    )
+                
+                # 早期终止
+                if not current_nodes:
+                    break
+                    
+            except Exception:
+                continue
+        
+        return current_nodes
+
+    def _multi_hop_traverse(
+        self,
+        start_nodes: List[str],
+        chain: Optional[List[Dict[str, Any]]],
+        requires_backtrack: bool = False
+    ) -> List[str]:
+        """
+        多跳遍历（支持回溯）
+        
+        用于支持如: Paper → HAS_AUTHOR → Author[order=1] → [回溯] → Paper
+        
+        Args:
+            start_nodes: 起始节点列表
+            chain: 遍历链定义
+            requires_backtrack: 是否需要回溯到起点
+        
+        Returns:
+            遍历结果节点列表
+        """
+        if not chain:
+            return start_nodes
+        
+        # 保存起始节点（用于回溯）
+        original_start_nodes = start_nodes[:]
+        
+        # 执行链式遍历
+        result_nodes = self._chain_traverse(start_nodes, chain)
+        
+        # 如果需要回溯
+        if requires_backtrack and result_nodes:
+            # 过滤起始节点：只保留那些通过遍历链能到达目标的起始节点
+            valid_start_nodes = []
+            
+            for start_node in original_start_nodes:
+                # 从单个起始节点执行遍历
+                temp_result = self._chain_traverse([start_node], chain)
+                # 如果这个起始节点能遍历到结果集中的任意节点，则保留
+                if temp_result and any(node in result_nodes for node in temp_result):
+                    valid_start_nodes.append(start_node)
+            
+            return valid_start_nodes
+        
+        return result_nodes

@@ -5,7 +5,7 @@ Browsecomp-V3 数据模型定义
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Optional, List
+from typing import Any, Optional, List, Dict
 from enum import Enum
 
 
@@ -32,6 +32,8 @@ class ActionType(str, Enum):
     FILTER_CURRENT_NODE = "filter_current_node"
     TRAVERSE_EDGE = "traverse_edge"
     TRAVERSE_AND_COUNT = "traverse_and_count"
+    MULTI_HOP_TRAVERSE = "multi_hop_traverse"  # 多跳遍历
+    CHAIN_TRAVERSE = "chain_traverse"  # 链式遍历
 
 
 @dataclass
@@ -45,6 +47,9 @@ class Constraint:
     filter_attribute: Optional[str] = None
     filter_condition: Any = None
     description: Optional[str] = None
+    # 多跳遍历相关字段
+    traversal_chain: Optional[List[Dict[str, Any]]] = None  # 遍历链定义
+    requires_backtrack: bool = False  # 是否需要回溯到起点
 
 
 @dataclass

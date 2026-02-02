@@ -22,8 +22,41 @@ class ConstraintGenerator:
 
     # 支持的约束类型白名单
     VALID_CONSTRAINT_TYPES: Set[str] = {
+        # ===== Phase 1: 基础约束 (4种) =====
         "temporal", "author_count", "citation", "title_format",
-        # 未来可扩展：更多约束类型需要实现多跳遍历后添加
+        
+        # ===== Phase 2: 多跳约束 (3种) =====
+        "person_name", "author_order", "institution_affiliation",
+        
+        # ===== Phase 3: 高级多跳约束 (3种) =====
+        "coauthor", "cited_by_author", "publication_venue",
+        
+        # ===== Phase 4: filter_current_node 类型约束 (8种) =====
+        "institution_founding",      # C06 - 机构成立时间
+        "paper_structure",           # C13 - 论文结构
+        "position_title",            # C17 - 职位头衔
+        "birth_info",                # C18 - 出生信息
+        "location",                  # C21 - 地理位置
+        "editorial_role",            # C24 - 编辑角色
+        "publication_details",       # C27 - 出版详情
+        "department",                # C30 - 部门
+        
+        # ===== Phase 5: Entity 相关约束 (9种) =====
+        "education_degree",          # C04 - 教育学位
+        "award_honor",               # C07 - 奖项荣誉
+        "research_topic",            # C10 - 研究主题
+        "method_technique",          # C11 - 方法技术
+        "data_sample",               # C12 - 数据样本
+        "acknowledgment",            # C14 - 致谢
+        "funding",                   # C15 - 资助信息
+        "conference_event",          # C16 - 会议事件
+        "technical_entity",          # C20 - 技术实体
+        
+        # ===== Phase 6: 其他遍历约束 (3种) =====
+        "publication_history",       # C23 - 发表历史
+        "measurement_value",         # C25 - 测量值
+        "company",                   # C26 - 公司
+        "advisor",                   # C29 - 导师关系
     }
 
     def __init__(self, kg_loader=None):
@@ -143,6 +176,26 @@ class ConstraintGenerator:
             valid_applicable_ids,
             k=min(num_constraints, len(valid_applicable_ids) * 2)  # 允许重复
         )
+        
+        # ===== Phase 3 约束注入 =====
+        # 以一定概率注入 Phase 3 高级多跳约束
+        # 这些约束已实现但未在映射文件模板中引用
+        phase3_injection_rate = 0.15  # 15% 概率注入 Phase 3 约束
+        
+        if random.random() < phase3_injection_rate:
+            # 定义 Phase 3 虚拟约束 ID
+            # 这些 ID 不存在于映射文件，但会被特殊处理
+            phase3_virtual_ids = {
+                'PHASE3_COAUTHOR': 'coauthor',
+                'PHASE3_CITED_BY_AUTHOR': 'cited_by_author', 
+                'PHASE3_PUBLICATION_VENUE': 'publication_venue'
+            }
+            
+            # 随机选择一个 Phase 3 约束注入
+            virtual_id = random.choice(list(phase3_virtual_ids.keys()))
+            selected_constraint_ids.append(virtual_id)
+            
+            logger.debug(f"Injected Phase 3 constraint: {virtual_id}")
 
         # 生成具体约束
         constraints = []
@@ -159,11 +212,26 @@ class ConstraintGenerator:
         seen_types = set()
         seen_ids = set()
         unique_constraints = []
+        
+        # 需要去重的约束类型（基于具体实体/名称的约束）
+        dedupe_types = {
+            # Phase 2-3: 多跳约束
+            "person_name", "institution_affiliation", "coauthor", 
+            "cited_by_author", "publication_venue",
+            # Phase 4: 过滤约束
+            "location", "position_title", "birth_info",
+            "editorial_role", "department",
+            # Phase 5: Entity 相关约束
+            "award_honor", "conference_event", "research_topic",
+            "technical_entity", "method_technique", "data_sample",
+            "acknowledgment", "funding",
+            # Phase 6: 其他
+            "company", "advisor", "education_degree"
+        }
+        
         for c in constraints:
-            # 对于某些约束类型（如person_name, institution_affiliation），避免重复
-            if c.constraint_type in ["person_name", "institution_affiliation", "location",
-                                      "position_title", "award_honor", "birth_info",
-                                      "editorial_role", "conference_event", "research_topic"]:
+            # 对于某些约束类型，避免重复（不同值的同类型约束会造成AND冲突）
+            if c.constraint_type in dedupe_types:
                 if c.constraint_type in seen_types:
                     continue
                 seen_types.add(c.constraint_type)
@@ -190,30 +258,65 @@ class ConstraintGenerator:
     def _instantiate_constraint(self, constraint_id: str) -> Optional[Constraint]:
         """
         实例化单个约束
-
+        
         Args:
-            constraint_id: 约束ID
-
+            constraint_id: 约束ID（可能是真实 ID 或虚拟 ID）
+            
         Returns:
             约束对象，如果无法实例化则返回None
         """
         try:
+            # ===== 处理 Phase 3 虚拟约束 ID =====
+            if constraint_id.startswith('PHASE3_'):
+                # 虚拟 ID 到约束类型的映射
+                phase3_mapping = {
+                    'PHASE3_COAUTHOR': 'coauthor',
+                    'PHASE3_CITED_BY_AUTHOR': 'cited_by_author',
+                    'PHASE3_PUBLICATION_VENUE': 'publication_venue'
+                }
+                
+                constraint_type = phase3_mapping.get(constraint_id)
+                if not constraint_type:
+                    logger.warning(f"Unknown Phase 3 virtual ID: {constraint_id}")
+                    return None
+                
+                # 创建虚拟规则
+                virtual_rule = {
+                    'constraint_type': constraint_type,
+                    'constraint_id': constraint_id,
+                    'graph_operation': {
+                        'action': 'multi_hop_traverse',
+                        'target_node': 'Paper',
+                        'edge_type': None,
+                        'filter_attribute': 'name'
+                    }
+                }
+                
+                # 直接调用多跳实例化
+                return self._instantiate_multi_hop_constraint(constraint_id, virtual_rule)
+            
+            # ===== 正常流程：从映射文件获取规则 =====
             # 获取映射规则
             rule = self.mapping_loader.get_constraint_rule(constraint_id)
             graph_op = rule.get("graph_operation", {})
-
+            
             # 解析基本属性
             constraint_type = rule.get("constraint_type")
             action_str = graph_op.get("action")
             target_node_str = graph_op.get("target_node")
             edge_type_str = graph_op.get("edge_type")
             filter_attribute = graph_op.get("filter_attribute")
-
+            
+            # 检查是否需要多跳遍历
+            if constraint_type in ["person_name", "author_order", "institution_affiliation", 
+                                    "coauthor", "cited_by_author", "publication_venue"]:
+                return self._instantiate_multi_hop_constraint(constraint_id, rule)
+            
             # 转换为枚举类型
             action = ActionType(action_str)
             target_node = NodeType(target_node_str) if target_node_str else None
             edge_type = EdgeType(edge_type_str) if edge_type_str else None
-
+            
             # 生成具体的约束值
             filter_condition = self.value_generator.generate_value(
                 constraint_id=constraint_id,
@@ -221,13 +324,13 @@ class ConstraintGenerator:
                 constraint_type=constraint_type,
                 target_node=target_node
             )
-
+            
             # 生成描述
             description = self._generate_constraint_description(
                 rule.get("constraint_name", ""),
                 filter_condition
             )
-
+            
             # 创建约束对象
             constraint = Constraint(
                 constraint_id=constraint_id,
@@ -239,12 +342,227 @@ class ConstraintGenerator:
                 filter_condition=filter_condition,
                 description=description,
             )
-
+            
             return constraint
-
+            
         except Exception as e:
             # 使用 logging 记录错误
             logger.warning(f"Failed to instantiate constraint {constraint_id}: {e}")
+            return None
+
+    def _instantiate_multi_hop_constraint(self, constraint_id: str, rule: dict) -> Optional[Constraint]:
+        """
+        实例化多跳约束
+        
+        Args:
+            constraint_id: 约束ID
+            rule: 约束规则
+            
+        Returns:
+            多跳约束对象
+        """
+        try:
+            constraint_type = rule.get("constraint_type")
+            
+            # 定义多跳遍历链
+            traversal_chain = None
+            requires_backtrack = False
+            filter_condition = None
+            description = ""
+            
+            # person_name: Paper → HAS_AUTHOR → Author[name=X]
+            if constraint_type == "person_name":
+                # 生成作者名称
+                author_name = self.value_generator.generate_value(
+                    constraint_id=constraint_id,
+                    filter_attribute="name",
+                    constraint_type="person_name",
+                    target_node=NodeType.AUTHOR
+                )
+                
+                if not author_name or author_name == "unknown":
+                    return None
+                
+                traversal_chain = [
+                    {
+                        "edge_type": "HAS_AUTHOR",
+                        "target_node": "Author",
+                        "node_filter": {"name": {"=": author_name}}
+                    }
+                ]
+                requires_backtrack = True  # 回溯到Paper
+                filter_condition = {"name": author_name}
+                description = f"作者名称: {author_name}"
+            
+            # author_order: Paper → HAS_AUTHOR[order=X] → Author
+            elif constraint_type == "author_order":
+                # 生成作者顺序 (1=first, -1=last, 2=second, etc.)
+                order = random.choice([1, 1, 1, 2, -1])  # 偏向第一作者
+                
+                traversal_chain = [
+                    {
+                        "edge_type": "HAS_AUTHOR",
+                        "target_node": "Author",
+                        "edge_filter": {"author_order": order}
+                    }
+                ]
+                requires_backtrack = True  # 回溯到Paper
+                filter_condition = {"author_order": order}
+                description = f"作者顺序: 第{order}作者" if order > 0 else "作者顺序: 最后作者"
+            
+            # institution_affiliation: Paper → HAS_AUTHOR → Author → AFFILIATED_WITH → Institution[name=X]
+            elif constraint_type == "institution_affiliation":
+                # 生成机构名称
+                institution_name = self.value_generator.generate_value(
+                    constraint_id=constraint_id,
+                    filter_attribute="name",
+                    constraint_type="institution_affiliation",
+                    target_node=NodeType.INSTITUTION
+                )
+                
+                if not institution_name or institution_name == "unknown":
+                    return None
+                
+                traversal_chain = [
+                    {
+                        "edge_type": "HAS_AUTHOR",
+                        "target_node": "Author",
+                    },
+                    {
+                        "edge_type": "AFFILIATED_WITH",
+                        "target_node": "Institution",
+                        "node_filter": {"name": {"=": institution_name}}
+                    }
+                ]
+                requires_backtrack = True  # 回溯到Paper
+                filter_condition = {"institution_name": institution_name}
+                description = f"机构隶属: {institution_name}"
+            
+            # coauthor: Paper A → HAS_AUTHOR → Author X → HAS_AUTHOR(reverse) → Paper B → HAS_AUTHOR → Author Y[name=Z]
+            # This is a 5-hop traversal to find papers whose authors have a specific coauthor
+            elif constraint_type == "coauthor":
+                # 生成合作者名称
+                coauthor_name = self.value_generator.generate_value(
+                    constraint_id=constraint_id,
+                    filter_attribute="name",
+                    constraint_type="coauthor",
+                    target_node=NodeType.AUTHOR
+                )
+                
+                if not coauthor_name or coauthor_name == "unknown":
+                    return None
+                
+                traversal_chain = [
+                    {
+                        "edge_type": "HAS_AUTHOR",
+                        "target_node": "Author",
+                        "description": "Get authors of the paper"
+                    },
+                    {
+                        "edge_type": "HAS_AUTHOR",
+                        "target_node": "Paper",
+                        "direction": "reverse",
+                        "description": "Get other papers by these authors"
+                    },
+                    {
+                        "edge_type": "HAS_AUTHOR",
+                        "target_node": "Author",
+                        "node_filter": {"name": {"=": coauthor_name}},
+                        "description": f"Filter for papers with coauthor {coauthor_name}"
+                    },
+                    {
+                        "edge_type": "HAS_AUTHOR",
+                        "target_node": "Paper",
+                        "direction": "reverse",
+                        "description": "Get papers by this coauthor"
+                    },
+                    {
+                        "edge_type": "HAS_AUTHOR",
+                        "target_node": "Author",
+                        "description": "Get all authors of these papers"
+                    }
+                ]
+                requires_backtrack = True  # 回溯到Paper
+                filter_condition = {"coauthor_name": coauthor_name}
+                description = f"合作者: {coauthor_name}"
+            
+            # cited_by_author: Paper A → CITES(reverse) → Paper B → HAS_AUTHOR → Author[name=X]
+            # 找到被特定作者引用的论文（反向+2跳）
+            elif constraint_type == "cited_by_author":
+                # 生成引用作者名称
+                citing_author_name = self.value_generator.generate_value(
+                    constraint_id=constraint_id,
+                    filter_attribute="name",
+                    constraint_type="cited_by_author",
+                    target_node=NodeType.AUTHOR
+                )
+                
+                if not citing_author_name or citing_author_name == "unknown":
+                    return None
+                
+                traversal_chain = [
+                    {
+                        "edge_type": "CITES",
+                        "target_node": "Paper",
+                        "direction": "reverse",
+                        "description": "Get papers that cite this paper"
+                    },
+                    {
+                        "edge_type": "HAS_AUTHOR",
+                        "target_node": "Author",
+                        "node_filter": {"name": {"=": citing_author_name}},
+                        "description": f"Filter for citing papers by {citing_author_name}"
+                    }
+                ]
+                requires_backtrack = True  # 回溯到Paper
+                filter_condition = {"cited_by_author": citing_author_name}
+                description = f"被引作者: {citing_author_name}"
+            
+            # publication_venue: Paper → PUBLISHED_IN → Venue[name=X]
+            # 找到发表在特定期刊/会议的论文（2跳）
+            elif constraint_type == "publication_venue":
+                # 生成期刊/会议名称
+                venue_name = self.value_generator.generate_value(
+                    constraint_id=constraint_id,
+                    filter_attribute="name",
+                    constraint_type="publication_venue",
+                    target_node=NodeType.VENUE
+                )
+                
+                if not venue_name or venue_name == "unknown":
+                    return None
+                
+                traversal_chain = [
+                    {
+                        "edge_type": "PUBLISHED_IN",
+                        "target_node": "Venue",
+                        "node_filter": {"name": {"=": venue_name}},
+                        "description": f"Filter for papers published in {venue_name}"
+                    }
+                ]
+                requires_backtrack = True  # 回溯到Paper
+                filter_condition = {"venue_name": venue_name}
+                description = f"发表期刊: {venue_name}"
+            
+            if not traversal_chain:
+                return None
+            
+            # 创建多跳约束对象
+            constraint = Constraint(
+                constraint_id=constraint_id,
+                constraint_type=constraint_type,
+                target_node=NodeType.PAPER,  # 最终目标是Paper节点
+                action=ActionType.MULTI_HOP_TRAVERSE,
+                filter_condition=filter_condition,
+                description=description,
+                traversal_chain=traversal_chain,
+                requires_backtrack=requires_backtrack
+            )
+            
+            return constraint
+            
+        except Exception as e:
+            logger.warning(f"Failed to instantiate multi-hop constraint {constraint_id}: {e}")
             return None
 
     def _generate_constraint_description(self, base_name: str, condition: Any) -> str:
