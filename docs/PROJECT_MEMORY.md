@@ -1,8 +1,8 @@
 # Browsecomp-V3 项目上下文记忆
 
-**最后更新**: 2026-02-03  
-**项目状态**: Phase 3 完成，机制分析完成，数据限制已识别  
-**当前版本**: v0.3.0 (Phase 3 Complete + Generation Mechanism Analysis)
+**最后更新**: 2026-02-03
+**项目状态**: Phase 3 完成，机制分析完成，固定搭配Demo实现
+**当前版本**: v0.3.2 (Fixed Rule Demo Implemented)
 
 ---
 
@@ -53,12 +53,15 @@ browsecomp-V3/
 │   └── utils/              # 日志工具
 ├── tests/                  # 测试（单元测试、集成测试）
 ├── docs/                   # 文档 ⭐ 新增多个报告
-│   ├── PROJECT_MEMORY.md           # 本文件
-│   ├── PHASE3_COMPLETE_REPORT.md   # Phase 3 完整实现报告
+│   ├── README.md                            # 📋 文档索引（先读这个）
+│   ├── PROJECT_MEMORY.md                    # 本文件
+│   ├── PHASE3_COMPLETE_REPORT.md            # Phase 3 完整实现报告
 │   ├── 30_CONSTRAINTS_ACTIVATION_REPORT.md  # 30 约束启用报告
 │   ├── CONSTRAINT_TYPES_ANALYSIS.md         # 约束类型分析
-│   └── PHASE3_FIX_REPORT.md                 # Phase 3 修复报告
+│   ├── PHASE3_FIX_REPORT.md                 # Phase 3 修复报告
+│   └── SPEC_DYNAMIC_CONSTRAINT_CHAIN.md     # 固定搭配Demo设计文档
 ├── output/                 # 输出目录
+├── demo_fixed_rule.py      # ⭐ 固定搭配Demo脚本（新增）
 ├── config/                 # 配置文件
 └── main.py                 # 主入口
 ```
@@ -104,7 +107,59 @@ pytest tests/integration/
 
 ## 📊 最近完成的工作
 
-### 2026-02-03: 问题生成机制深度分析 ✅ NEW
+### 2026-02-03: 固定搭配Demo实现 ✅ NEW
+
+**实现时间**: 2026-02-03
+**目标**: 实现杨逸飞提出的"固定搭配"思路，批量生成同类问题
+**分支**: `feature/dynamic-constraint-chain`
+
+#### 实现内容
+
+**1. 独立Demo脚本**
+- 文件: `/home/huyuming/projects/browsecomp-V3/demo_fixed_rule.py`
+- 设计: 不改动V3核心代码，独立运行
+- 功能: 固定规则 + 绑定约束 → 批量生成50个同类问题
+
+**2. 固定规则定义**
+```python
+RULE = {
+    "name": "论文-作者-机构链",
+    "description": "Paper-HasAuthor-Author-AffiliatedWith-Institution",
+    "pattern": ["Paper", "HAS_AUTHOR", "Author", "AFFILIATED_WITH", "Institution"],
+    "constraints": ["publication_year", "author_name"],
+    "target_count": 50
+}
+```
+
+**3. 关键问题与修复**
+- **问题1**: `year`字段为空，导致所有问题默认2020年
+  - 修复: 从`publication_date`提取真实年份
+- **问题2**: 约束不足导致同一问题多个答案
+  - 修复: 问题中加入作者名确保唯一性
+
+**4. 生成结果**
+- 50个问题全部唯一
+- 每个问题有唯一答案
+- 输出: `output/demo_fixed_rule/fixed_rule_demo_*.md`
+
+**示例问题**:
+```
+问题: 2021年发表的论文中，作者Hongbo Lou来自哪个机构？
+答案: Center for High Pressure Science and Technology Advanced Research
+推理链: paper_49 → HAS_AUTHOR → author_269 → AFFILIATED_WITH → inst_1
+```
+
+**5. 与V3的区别**
+| 方面 | V3 | 固定搭配Demo |
+|------|-----|-------------|
+| 规则选择 | 7个模板随机选 | 固定1个规则 |
+| 约束选择 | 随机组合 | 绑定2个约束 |
+| 生成方式 | 每次不同 | 批量同类 |
+| 代码改动 | 改动核心逻辑 | 独立脚本，不影响V3 |
+
+---
+
+### 2026-02-03: 问题生成机制深度分析 ✅
 
 **核心发现**: V3 采用**漏斗模型 + 藏宝图模型**的混合架构
 
@@ -698,6 +753,11 @@ def _generate_venue_value(self) -> str:
 18. `test_multi_hop_traversal.py` - 多跳遍历测试
 19. `test_multi_hop_scale.py` - 大规模测试
 
+### 固定搭配Demo（2026-02-03）⭐ NEW
+20. `demo_fixed_rule.py` - 固定搭配Demo脚本
+21. `docs/SPEC_DYNAMIC_CONSTRAINT_CHAIN.md` - 固定搭配设计文档
+22. `output/demo_fixed_rule/` - Demo输出目录
+
 ---
 
 ## 🔬 问题生成机制详解（2026-02-03 更新）⭐ NEW
@@ -1017,6 +1077,7 @@ if constraint_type == "paper_structure":
 
 | 版本 | 日期 | 主要变更 |
 |------|------|----------|
+| v0.3.2 | 2026-02-03 | ✅ 固定搭配Demo实现（50个同类问题批量生成） |
 | v0.3.1 | 2026-02-03 | ✅ 问题生成机制分析完成，数据限制识别 |
 | v0.3.0 | 2026-02-02 | ✅ Phase 3 完成，代码注入机制，20 种约束可用 |
 | v0.2.0 | 2026-01-XX | Phase 2 完成，多跳遍历，7 种约束 |
@@ -1048,9 +1109,9 @@ if constraint_type == "paper_structure":
 
 ---
 
-**文档维护**: 每次重大更新后更新本文件  
-**最后更新人**: AI Assistant  
-**最后更新内容**: 问题生成机制深度分析（2026-02-03）  
+**文档维护**: 每次重大更新后更新本文件
+**最后更新人**: AI Assistant
+**最后更新内容**: 固定搭配Demo实现（2026-02-03）
 **联系方式**: 项目 Issue 追踪
 
 ---
