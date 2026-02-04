@@ -77,7 +77,11 @@ class PaperChain:
 class PaperChainBuilder:
     """论文引用链构建器"""
 
-    def __init__(self, test_data_path: str = "data/yang_chain_test_set.json"):
+    def __init__(self, test_data_path: str = None):
+        if test_data_path is None:
+            # 使用相对于脚本的路径
+            script_dir = Path(__file__).parent
+            test_data_path = script_dir / ".." / "data" / "yang_chain_test_set.json"
         self.test_data_path = Path(test_data_path)
         self.test_data = None
         self._load_test_data()
@@ -485,7 +489,8 @@ def main():
 
     # Step 5: Export
     print("[5/5] 导出结果...")
-    output_dir = Path("output/yang_chain_demo")
+    script_dir = Path(__file__).parent
+    output_dir = script_dir / ".." / "output"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Export markdown
@@ -495,7 +500,7 @@ def main():
         "paper_count": len(chain.papers)
     }
     export_markdown(questions, md_path, chain_info)
-    print(f"      ✓ Markdown: {md_path}")
+    print(f"      ✓ Markdown: {md_path.resolve()}")
 
     # Export JSON
     json_path = output_dir / f"yang_chain_demo_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
@@ -509,12 +514,12 @@ def main():
             },
             "questions": questions
         }, f, indent=2, ensure_ascii=False)
-    print(f"      ✓ JSON: {json_path}")
+    print(f"      ✓ JSON: {json_path.resolve()}")
 
     print()
     print("=" * 70)
     print("生成完成!")
-    print(f"输出目录: {output_dir}")
+    print(f"输出目录: {output_dir.resolve()}")
     print("=" * 70)
 
     # Print sample questions

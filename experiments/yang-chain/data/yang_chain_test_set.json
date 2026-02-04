@@ -1,0 +1,465 @@
+{
+  "metadata": {
+    "description": "Yang Yifei chain experiment test set - 3 paper citation chain",
+    "created": "2026-02-04",
+    "papers": [
+      "paper_1",
+      "paper_4",
+      "paper_5",
+      "paper_6"
+    ]
+  },
+  "papers": [
+    {
+      "paper_id": "paper_1",
+      "title": "Nested order-disorder framework containing a crystalline matrix with self-filled amorphous-like innards",
+      "publication_date": "2022-08-09",
+      "abstract": "Solids can be generally categorized by their structures into crystalline and amorphous states with different interactions among atoms dictating their properties. Crystalline-amorphous hybrid structure...",
+      "connected_entities": [
+        {
+          "type": "Author",
+          "name": "Kejun Bu",
+          "entity_id": "author_1",
+          "author_order": "first"
+        },
+        {
+          "type": "Institution",
+          "name": "Center for High Pressure Science and Technology Advanced Research",
+          "entity_id": "inst_1"
+        },
+        {
+          "type": "Author",
+          "name": "Qingyang Hu",
+          "entity_id": "author_2",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Center for High Pressure Science and Technology Advanced Research",
+          "entity_id": "inst_1"
+        },
+        {
+          "type": "Author",
+          "name": "Xiaohuan Qi",
+          "entity_id": "author_3",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Shanghai Institute of Ceramics",
+          "entity_id": "inst_3"
+        },
+        {
+          "type": "Author",
+          "name": "Dong Wang",
+          "entity_id": "author_4",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Center for High Pressure Science and Technology Advanced Research",
+          "entity_id": "inst_1"
+        },
+        {
+          "type": "Author",
+          "name": "Songhao Guo",
+          "entity_id": "author_5",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Center for High Pressure Science and Technology Advanced Research",
+          "entity_id": "inst_1"
+        },
+        {
+          "type": "Author",
+          "name": "Hui Luo",
+          "entity_id": "author_6",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Center for High Pressure Science and Technology Advanced Research",
+          "entity_id": "inst_1"
+        },
+        {
+          "type": "Author",
+          "name": "Tianquan Lin",
+          "entity_id": "author_7",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Peking University",
+          "entity_id": "inst_12"
+        },
+        {
+          "type": "Author",
+          "name": "Xiaofeng Guo",
+          "entity_id": "author_8",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Washington State University",
+          "entity_id": "inst_4"
+        },
+        {
+          "type": "Author",
+          "name": "Qiaoshi Zeng",
+          "entity_id": "author_9",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Southeast University",
+          "entity_id": "inst_117"
+        },
+        {
+          "type": "Author",
+          "name": "Yang Ding",
+          "entity_id": "author_10",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Geophysical Laboratory",
+          "entity_id": "inst_30"
+        },
+        {
+          "type": "Author",
+          "name": "Fuqiang Huang",
+          "entity_id": "author_11",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Peking University",
+          "entity_id": "inst_12"
+        },
+        {
+          "type": "Author",
+          "name": "Wenge Yang",
+          "entity_id": "author_12",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Center for High Pressure Science & Technology Advanced Research",
+          "entity_id": "inst_74"
+        },
+        {
+          "type": "Author",
+          "name": "Ho‐kwang Mao",
+          "entity_id": "author_13",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Center for High Pressure Science & Technology Advanced Research",
+          "entity_id": "inst_74"
+        },
+        {
+          "type": "Author",
+          "name": "Xujie Lü",
+          "entity_id": "author_14",
+          "author_order": "last"
+        },
+        {
+          "type": "Institution",
+          "name": "University of Nevada, Las Vegas",
+          "entity_id": "inst_13"
+        },
+        {
+          "type": "Year",
+          "value": 2022
+        }
+      ]
+    },
+    {
+      "paper_id": "paper_4",
+      "title": "Atomic packing and short-to-medium-range order in metallic glasses",
+      "publication_date": "2006-01-01",
+      "abstract": "Unlike the well-defined long-range order that characterizes crystalline metals, the atomic arrangements in amorphous alloys remain mysterious at present. Despite intense research activity on metallic ...",
+      "connected_entities": [
+        {
+          "type": "Author",
+          "name": "H. W. Sheng",
+          "entity_id": "author_17",
+          "author_order": "first"
+        },
+        {
+          "type": "Institution",
+          "name": "George Mason University",
+          "entity_id": "inst_31"
+        },
+        {
+          "type": "Author",
+          "name": "Weiqi Luo",
+          "entity_id": "author_18",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Johns Hopkins University",
+          "entity_id": "inst_5"
+        },
+        {
+          "type": "Author",
+          "name": "Faisal M. Alamgir",
+          "entity_id": "author_19",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "National Institute of Standards and Technology",
+          "entity_id": "inst_6"
+        },
+        {
+          "type": "Author",
+          "name": "Jianming Bai",
+          "entity_id": "author_20",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Oak Ridge National Laboratory",
+          "entity_id": "inst_7"
+        },
+        {
+          "type": "Author",
+          "name": "E. Ma",
+          "entity_id": "author_21",
+          "author_order": "last"
+        },
+        {
+          "type": "Institution",
+          "name": "Johns Hopkins University",
+          "entity_id": "inst_5"
+        },
+        {
+          "type": "Year",
+          "value": 2006
+        }
+      ]
+    },
+    {
+      "paper_id": "paper_5",
+      "title": "Increasing Solar Absorption for Photocatalysis with Black Hydrogenated Titanium Dioxide Nanocrystals",
+      "publication_date": "2011-01-20",
+      "abstract": "An amorphous surface layer on titantium dioxide nanoparticles creates electronic states that allow longer-wavelength photoexcitation....",
+      "connected_entities": [
+        {
+          "type": "Author",
+          "name": "Xiaobo Chen",
+          "entity_id": "author_22",
+          "author_order": "first"
+        },
+        {
+          "type": "Institution",
+          "name": "University of California, Berkeley",
+          "entity_id": "inst_9"
+        },
+        {
+          "type": "Author",
+          "name": "Lei Liu",
+          "entity_id": "author_23",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "University of California, Berkeley",
+          "entity_id": "inst_9"
+        },
+        {
+          "type": "Author",
+          "name": "Peter Y. Yu",
+          "entity_id": "author_24",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "University of California, Berkeley",
+          "entity_id": "inst_9"
+        },
+        {
+          "type": "Author",
+          "name": "Samuel S. Mao",
+          "entity_id": "author_25",
+          "author_order": "last"
+        },
+        {
+          "type": "Institution",
+          "name": "University of California, Berkeley",
+          "entity_id": "inst_9"
+        },
+        {
+          "type": "Year",
+          "value": 2011
+        }
+      ]
+    },
+    {
+      "paper_id": "paper_6",
+      "title": "Core-Shell Nanostructured “Black” Rutile Titania as Excellent Catalyst for Hydrogen Production Enhanced by Sulfur Doping",
+      "publication_date": "2013-10-28",
+      "abstract": "Modification of rutile titanium dioxide (TiO2) for hydrogen generation and water cleaning is a grand challenge due to the chemical inertness of rutile, while such inertness is a desired merit for its ...",
+      "connected_entities": [
+        {
+          "type": "Author",
+          "name": "Chongyin Yang",
+          "entity_id": "author_26",
+          "author_order": "first"
+        },
+        {
+          "type": "Institution",
+          "name": "Shanghai Institute of Ceramics",
+          "entity_id": "inst_3"
+        },
+        {
+          "type": "Author",
+          "name": "Zhou Wang",
+          "entity_id": "author_27",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Peking University",
+          "entity_id": "inst_12"
+        },
+        {
+          "type": "Author",
+          "name": "Tianquan Lin",
+          "entity_id": "author_7",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Peking University",
+          "entity_id": "inst_12"
+        },
+        {
+          "type": "Author",
+          "name": "Hao Yin",
+          "entity_id": "author_28",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Chinese Academy of Sciences",
+          "entity_id": "inst_2"
+        },
+        {
+          "type": "Author",
+          "name": "Xujie Lü",
+          "entity_id": "author_14",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "University of Nevada, Las Vegas",
+          "entity_id": "inst_13"
+        },
+        {
+          "type": "Author",
+          "name": "Dongyun Wan",
+          "entity_id": "author_29",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Chinese Academy of Sciences",
+          "entity_id": "inst_2"
+        },
+        {
+          "type": "Author",
+          "name": "Tao Xu",
+          "entity_id": "author_30",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Northern Illinois University",
+          "entity_id": "inst_14"
+        },
+        {
+          "type": "Author",
+          "name": "Chong Zheng",
+          "entity_id": "author_31",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Northern Illinois University",
+          "entity_id": "inst_14"
+        },
+        {
+          "type": "Author",
+          "name": "Jianhua Lin",
+          "entity_id": "author_32",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Peking University",
+          "entity_id": "inst_12"
+        },
+        {
+          "type": "Author",
+          "name": "Fuqiang Huang",
+          "entity_id": "author_11",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Peking University",
+          "entity_id": "inst_12"
+        },
+        {
+          "type": "Author",
+          "name": "Xiaoming Xie",
+          "entity_id": "author_33",
+          "author_order": "middle"
+        },
+        {
+          "type": "Institution",
+          "name": "Chinese Academy of Sciences",
+          "entity_id": "inst_2"
+        },
+        {
+          "type": "Author",
+          "name": "Mianheng Jiang",
+          "entity_id": "author_34",
+          "author_order": "last"
+        },
+        {
+          "type": "Institution",
+          "name": "Chinese Academy of Sciences",
+          "entity_id": "inst_2"
+        },
+        {
+          "type": "Year",
+          "value": 2013
+        }
+      ]
+    }
+  ],
+  "entities": {},
+  "citation_chain": [
+    {
+      "from": "paper_1",
+      "to": "paper_4",
+      "relation": "CITES"
+    },
+    {
+      "from": "paper_1",
+      "to": "paper_5",
+      "relation": "CITES"
+    },
+    {
+      "from": "paper_1",
+      "to": "paper_6",
+      "relation": "CITES"
+    }
+  ]
+}
