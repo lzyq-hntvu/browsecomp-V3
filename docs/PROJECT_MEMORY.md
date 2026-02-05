@@ -1,8 +1,8 @@
 # Browsecomp-V3 项目上下文记忆
 
-**最后更新**: 2026-02-03
-**项目状态**: Phase 3 完成，机制分析完成，固定搭配Demo实现
-**当前版本**: v0.3.2 (Fixed Rule Demo Implemented)
+**最后更新**: 2026-02-04
+**项目状态**: 杨逸飞推理链实验完成，低成本构建研究报告发布
+**当前版本**: v0.4.0 (Yang Chain Experiment Completed)
 
 ---
 
@@ -17,6 +17,7 @@ Browsecomp-V3 是一个**约束驱动的复杂学术问题生成器**，基于�
 - ✅ 支持 JSON/Markdown 双格式输出
 - ✅ 多样性检查和质量验证
 - ✅ **代码注入机制**实现高级约束
+- ✅ **杨逸飞推理链实验**完成（引用链专用，方案C折中混合）
 
 ### 关键指标（当前状态 - 2026-02-02）
 
@@ -51,17 +52,33 @@ browsecomp-V3/
 │   ├── validator/          # 质量验证（验证器、多样性检查）
 │   ├── output/             # 格式化输出（JSON/Markdown导出）
 │   └── utils/              # 日志工具
+├── experiments/            # 实验目录 ⭐ NEW
+│   └── yang-chain/         # 杨逸飞推理链实验
+│       ├── src/            # 实验源代码
+│       ├── data/           # 测试数据
+│       └── output/         # 实验输出
 ├── tests/                  # 测试（单元测试、集成测试）
-├── docs/                   # 文档 ⭐ 新增多个报告
+├── docs/                   # 文档
 │   ├── README.md                            # 📋 文档索引（先读这个）
+│   ├── BROWSECOMP_V3_PRIMER.md              # 📖 科普文档（新手必读）
 │   ├── PROJECT_MEMORY.md                    # 本文件
+│   ├── STRATEGIC_DIRECTION_DISCUSSION.md    # 战略方向讨论记录
+│   ├── KG_STRUCTURE_ANALYSIS.md             # 知识图谱结构分析
+│   ├── QANDA_KG_ANALYSIS.md                 # QandA知识图谱完整分析 ⭐ NEW
+│   ├── SOLUTION_A_DETAILED_DESIGN.md        # 方案A详细设计
+│   ├── SOLUTION_A_V2_BROWSE_COMPLEXITY.md   # 方案A v2.0设计
+│   ├── SOLUTION_A_V3_RISK_MITIGATION.md     # 方案A v3.0风险缓解 ⭐ NEW
+│   ├── LOW_COST_CONSTRUCTION_REPORT.md      # 低成本构建研究
+│   ├── YANG_CHAIN_EXPERIMENT_PLAN.md        # 杨逸飞实验计划
+│   ├── YANG_CHAIN_TEST_REPORT.md            # 杨逸飞测试报告
+│   ├── YANG_CHAIN_CONCLUSION.md             # 杨逸飞实验结论
 │   ├── PHASE3_COMPLETE_REPORT.md            # Phase 3 完整实现报告
 │   ├── 30_CONSTRAINTS_ACTIVATION_REPORT.md  # 30 约束启用报告
 │   ├── CONSTRAINT_TYPES_ANALYSIS.md         # 约束类型分析
 │   ├── PHASE3_FIX_REPORT.md                 # Phase 3 修复报告
 │   └── SPEC_DYNAMIC_CONSTRAINT_CHAIN.md     # 固定搭配Demo设计文档
 ├── output/                 # 输出目录
-├── demo_fixed_rule.py      # ⭐ 固定搭配Demo脚本（新增）
+├── demo_fixed_rule.py      # ⭐ 固定搭配Demo脚本
 ├── config/                 # 配置文件
 └── main.py                 # 主入口
 ```
@@ -107,7 +124,97 @@ pytest tests/integration/
 
 ## 📊 最近完成的工作
 
-### 2026-02-03: 固定搭配Demo实现 ✅ NEW
+### 2026-02-04: 杨逸飞推理链实验完成 ✅ NEW
+
+**实验时间**: 2026-02-04
+**分支**: `experiment/yang-yifei-chain`
+**状态**: 实验完成，采用方案C（折中混合）
+
+#### 实验内容
+
+**核心思想**: "论文引用链 + 描述实体" → 复杂学术问题
+
+**1. 实现版本**
+- 基础版本: `demo_yang_chain.py` - 2-4节点链，前向/后向/跳跃推理
+- 复杂版本: `demo_yang_chain_complex.py` - 6种复杂问题类型
+- 回溯版本: `demo_yang_chain_backtrack.py` - 回溯算法实现
+- 降级版本: `demo_yang_chain_fallback.py` - 降级回退机制
+- 模拟版本: `demo_yang_chain_10node_simulation.py` - 10节点链模拟
+
+**2. 测试结果**
+- ✅ 2-hop 引用链构建成功
+- ✅ 7个有效问题生成
+- ✅ 4种推理模式实现（Forward/Backward/Hop/Comparison）
+- ❌ 3-hop链未测试（KG结构限制）
+
+**3. 决策结论**
+
+采用**方案C - 折中混合**策略:
+
+| 场景 | 推荐方案 | 原因 |
+|------|----------|------|
+| 引用链推理 | 杨逸飞链式 | 更自然、更直接 |
+| 作者-机构路径 | V3模板A | 成熟稳定 |
+| 快速原型验证 | 杨逸飞链式 | 实现简单 |
+| 大规模生产 | V3模板 | 质量可控 |
+
+**4. 价值评估**
+
+| 维度 | 评分 | 说明 |
+|------|------|------|
+| 技术可行性 | ★★★★☆ | 核心思路可行，实现简单 |
+| 问题质量 | ★★★☆☆ | 质量良好但多样性有限 |
+| 可扩展性 | ★★☆☆☆ | 大规模场景需要额外机制 |
+| 与V3互补性 | ★★★★★ | 完美补充V3的引用链场景 |
+
+**5. 相关文档**
+- `docs/YANG_CHAIN_EXPERIMENT_PLAN.md` - 原始实验计划
+- `docs/YANG_CHAIN_TEST_REPORT.md` - 测试报告
+- `docs/YANG_CHAIN_CONCLUSION.md` - 结论与决策
+- `experiments/yang-chain/README.md` - 实验目录说明
+
+---
+
+### 2026-02-04: BrowseComp低成本构建研究报告 ✅ NEW
+
+**报告发布**: 2026-02-04
+**文件**: `docs/LOW_COST_CONSTRUCTION_REPORT.md`
+
+#### 报告内容
+
+**核心研究**: 如何低成本构建 BrowseComp 风格的复杂学术问题
+
+**1. BrowseComp 核心特点**
+- 答案简短且唯一
+- 难以发现（不在前5个搜索结果）
+- 多条件组合约束
+- GPT-4o 准确率仅 0.6%
+
+**2. 三种低成本方案**
+
+| 方案 | 成本/1000题 | 可用率 | 适用场景 |
+|------|-------------|--------|----------|
+| 知识图谱自动化 | $500-1,000 | 70-80% | 结构化领域数据 |
+| LLM合成生成 | $300-500 | 50-60% | 快速原型 |
+| 混合式半自动 | $500-1,000 | 70-80% | **推荐** |
+
+**3. 关键技术**
+- 知识图谱子图采样
+- 模板化问题生成
+- LLM-as-Verifier 质量验证
+- 多层次过滤机制
+
+**4. 成本对比**
+
+| 项目 | 传统方法 | 低成本方案 | 节省 |
+|------|---------|-----------|------|
+| 问题生成 | $10-20/题 | $0.5-1/题 | 90-95% |
+| 验证成本 | $20-30/题 | $2-3/题 | 85-90% |
+| 时间成本 | 2-4小时/题 | 10-20分钟/题 | 85-90% |
+
+---
+
+### 2026-02-03: 固定搭配Demo实现
 
 **实现时间**: 2026-02-03
 **目标**: 实现杨逸飞提出的"固定搭配"思路，批量生成同类问题
@@ -725,9 +832,15 @@ def _generate_venue_value(self) -> str:
 ## 📚 重要文档索引
 
 ### 核心文档
-1. `CODEBUDDY.md` - AI 助手工作指南
-2. `PROJECT_MEMORY.md` - 本文件，项目记忆
-3. `README.md` - 项目概述
+1. **`BROWSECOMP_V3_PRIMER.md`** - 科普文档
+   - 系统介绍、推理链模板、常见误区澄清
+   - 适合：第一次接触项目的读者
+2. **`STRATEGIC_DIRECTION_DISCUSSION.md`** - 战略方向讨论 ⭐ NEW
+   - 三个战略方向对比（合成值生成 vs 扩展KG vs Benchmark）
+   - 推荐方向A：1-2周完成，成本$500-1000
+3. `CODEBUDDY.md` - AI 助手工作指南
+4. `PROJECT_MEMORY.md` - 本文件，项目记忆
+5. `README.md` - 项目概述
 
 ### 问题生成机制分析（2026-02-03）⭐ NEW
 4. `docs/GENERATION_MECHANISM_ANALYSIS.md` - 漏斗模型 + 藏宝图模型完整解释
@@ -753,10 +866,39 @@ def _generate_venue_value(self) -> str:
 18. `test_multi_hop_traversal.py` - 多跳遍历测试
 19. `test_multi_hop_scale.py` - 大规模测试
 
-### 固定搭配Demo（2026-02-03）⭐ NEW
-20. `demo_fixed_rule.py` - 固定搭配Demo脚本
-21. `docs/SPEC_DYNAMIC_CONSTRAINT_CHAIN.md` - 固定搭配设计文档
-22. `output/demo_fixed_rule/` - Demo输出目录
+### 杨逸飞推理链实验（2026-02-04）
+20. `experiments/yang-chain/` - 实验目录
+21. `docs/YANG_CHAIN_EXPERIMENT_PLAN.md` - 实验计划
+22. `docs/YANG_CHAIN_TEST_REPORT.md` - 测试报告
+23. `docs/YANG_CHAIN_CONCLUSION.md` - 结论与决策
+
+### 低成本构建研究（2026-02-04）
+24. `docs/LOW_COST_CONSTRUCTION_REPORT.md` - 低成本构建研究报告
+
+### 战略方向讨论（2026-02-04）
+25. `docs/STRATEGIC_DIRECTION_DISCUSSION.md` - 战略方向讨论记录
+   - 推荐方向A：合成值生成（1-2周，$500-1000）
+
+### 知识图谱分析（2026-02-04）
+26. `docs/KG_STRUCTURE_ANALYSIS.md` - QandA知识图谱结构分析
+   - 结论：确认为星形结构（paper_1引用其他51篇）
+   - 影响：无法构建3跳以上引用链
+27. `docs/QANDA_KG_ANALYSIS.md` - QandA知识图谱完整分析报告 ⭐ NEW
+   - 数据规模：52论文/260作者/113机构/2943实体(86.5%)
+   - 引用关系稀疏：平均1.08条/论文
+
+### 方案A设计文档（2026-02-05）
+28. `docs/SOLUTION_A_DETAILED_DESIGN.md` - 方案A详细设计文档
+   - 核心机制、风险分析、完整架构、代码框架
+29. `docs/SOLUTION_A_V2_BROWSE_COMPLEXITY.md` - 方案A v2.0设计
+   - 基于Browse Complexity重构，虚拟网页网络设计
+30. `docs/SOLUTION_A_V3_RISK_MITIGATION.md` - 方案A v3.0风险缓解 ⭐ NEW
+   - 4大致命风险识别、完整系统架构、成本修正($48/1000题)
+
+### 固定搭配Demo（2026-02-03）
+27. `demo_fixed_rule.py` - 固定搭配Demo脚本
+28. `docs/SPEC_DYNAMIC_CONSTRAINT_CHAIN.md` - 固定搭配设计文档
+29. `output/demo_fixed_rule/` - Demo输出目录
 
 ---
 
@@ -1077,9 +1219,16 @@ if constraint_type == "paper_structure":
 
 | 版本 | 日期 | 主要变更 |
 |------|------|----------|
-| v0.3.2 | 2026-02-03 | ✅ 固定搭配Demo实现（50个同类问题批量生成） |
-| v0.3.1 | 2026-02-03 | ✅ 问题生成机制分析完成，数据限制识别 |
-| v0.3.0 | 2026-02-02 | ✅ Phase 3 完成，代码注入机制，20 种约束可用 |
+| v0.5.1 | 2026-02-05 | ✅ 方案A v3.0风险缓解文档 + QandA KG完整分析 |
+| v0.5.0 | 2026-02-05 | ✅ 方案A设计文档发布（DETAILED_DESIGN + V2_BROWSE_COMPLEXITY） |
+| v0.4.2 | 2026-02-04 | ✅ 知识图谱结构分析（KG_STRUCTURE_ANALYSIS.md） |
+| v0.4.1 | 2026-02-04 | ✅ 科普文档发布（BROWSECOMP_V3_PRIMER.md） |
+| v0.4.0 | 2026-02-04 | ✅ 战略方向讨论记录（STRATEGIC_DIRECTION_DISCUSSION.md） |
+| v0.3.3 | 2026-02-04 | ✅ 杨逸飞推理链实验完成（方案C折中混合） |
+| v0.3.2 | 2026-02-04 | ✅ 低成本构建研究报告发布 |
+| v0.3.1 | 2026-02-03 | ✅ 固定搭配Demo实现（50个同类问题批量生成） |
+| v0.3.0 | 2026-02-03 | ✅ 问题生成机制分析完成，数据限制识别 |
+| v0.2.2 | 2026-02-02 | ✅ Phase 3 完成，代码注入机制，20 种约束可用 |
 | v0.2.0 | 2026-01-XX | Phase 2 完成，多跳遍历，7 种约束 |
 | v0.1.0 | 2025-XX-XX | Phase 1 完成，基础架构，4 种约束 |
 
@@ -1088,14 +1237,17 @@ if constraint_type == "paper_structure":
 ## 🎯 下一步建议
 
 ### 立即可做
-1. **阅读机制分析** - 理解漏斗和藏宝图模型如何工作
-2. **查看测试报告** - 了解系统当前能力和限制
-3. **理解数据限制** - 为什么复杂问题生成困难
+1. **阅读杨逸飞实验结论** - 了解实验结果和决策建议
+2. **阅读低成本构建报告** - 理解 BrowseComp 风格问题的低成本构建方法
+3. **阅读机制分析** - 理解漏斗和藏宝图模型如何工作
+4. **查看测试报告** - 了解系统当前能力和限制
+5. **理解数据限制** - 为什么复杂问题生成困难
 
 ### 短期计划（1-2 周）
-1. **优化约束过滤** - 动态调整约束数量（COMPLEX_QUESTION_GENERATION_ANALYSIS.md Phase 1）
-2. **约束兼容性检查** - 避免不兼容约束组合
-3. **提升平均约束数** - 从 1.2 提升到 2.0
+1. **杨逸飞方案集成** - 将链式推理作为V3模板H（引用链专用）
+2. **优化约束过滤** - 动态调整约束数量（COMPLEX_QUESTION_GENERATION_ANALYSIS.md Phase 1）
+3. **约束兼容性检查** - 避免不兼容约束组合
+4. **提升平均约束数** - 从 1.2 提升到 2.0
 
 ### 中期计划（1-2 月）
 1. **扩展 QandA KG** - 添加 Author/Institution 缺失属性
@@ -1111,7 +1263,7 @@ if constraint_type == "paper_structure":
 
 **文档维护**: 每次重大更新后更新本文件
 **最后更新人**: AI Assistant
-**最后更新内容**: 固定搭配Demo实现（2026-02-03）
+**最后更新内容**: 方案A v3.0风险缓解 + QandA KG完整分析（2026-02-05）
 **联系方式**: 项目 Issue 追踪
 
 ---
