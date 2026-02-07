@@ -4,6 +4,19 @@
 
 ---
 
+## 快速查找
+
+| 想要... | 阅读文档 |
+|---------|---------|
+| 了解项目当前状态 | `PROJECT_MEMORY.md` |
+| 快速上手 | `QUICK_START.md` |
+| 查看常见问题 | `FAQ.md` |
+| 了解架构设计 | `ARCHITECTURE.md` |
+| 查看版本历史 | `CHANGELOG.md` |
+| 查看完整文档索引 | 本文档 |
+
+---
+
 ## 快速导航
 
 | 分类 | 说明 | 推荐顺序 |
@@ -29,9 +42,25 @@
 
 ## 项目总览
 
-- **PROJECT_MEMORY.md** - 项目完整上下文记忆
-  - 包含：项目状态、核心特性、关键指标、项目结构、快速命令
-  - 适合：首次接触项目或需要了解全貌时阅读
+- **PROJECT_MEMORY.md** - 项目状态快照 ⭐ 精简版（2026-02-05）
+  - 包含：项目状态、核心特性、关键指标、当前决策点
+  - 适合：首次接触项目或需要了解当前状态时阅读
+
+- **QUICK_START.md** - 快速开始指南 ⭐ NEW
+  - 包含：安装、快速生成、测试、核心概念
+  - 适合：新用户快速上手
+
+- **FAQ.md** - 常见问题 ⭐ NEW
+  - 包含：项目状态、系统架构、问题生成相关问题
+  - 适合：查找常见问题答案
+
+- **ARCHITECTURE.md** - 系统架构 ⭐ NEW
+  - 包含：模块化流水线、约束类型、遍历能力、代码注入机制
+  - 适合：了解系统设计和实现细节
+
+- **CHANGELOG.md** - 版本历史 ⭐ NEW
+  - 包含：所有版本的主要变更记录
+  - 适合：查看项目演进历史
 
 ---
 
@@ -158,11 +187,13 @@
 ## 文档阅读建议
 
 ### 新团队成员
-1. **BROWSECOMP_V3_PRIMER.md** - 科普入门，理解核心概念 ⭐ NEW
-2. PROJECT_MEMORY.md - 了解项目全貌
-3. YANG_CHAIN_CONCLUSION.md - 了解最新实验结论
-4. GENERATION_MECHANISM_ANALYSIS.md - 理解核心机制
-5. CONSTRAINT_TYPES_ANALYSIS.md - 了解约束系统
+1. **QUICK_START.md** - 快速开始，立即上手 ⭐ NEW
+2. **BROWSECOMP_V3_PRIMER.md** - 科普入门，理解核心概念
+3. **PROJECT_MEMORY.md** - 了解项目当前状态
+4. **FAQ.md** - 查看常见问题
+5. YANG_CHAIN_CONCLUSION.md - 了解最新实验结论
+6. GENERATION_MECHANISM_ANALYSIS.md - 理解核心机制
+7. CONSTRAINT_TYPES_ANALYSIS.md - 了解约束系统
 
 ### 开发人员
 1. YANG_CHAIN_EXPERIMENT_PLAN.md - 了解实验设计 ⭐ NEW
